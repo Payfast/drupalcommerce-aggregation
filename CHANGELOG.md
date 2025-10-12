@@ -1,4 +1,4 @@
-# Change Log
+# Changelog
 
 ## [[1.5.0]](https://github.com/Payfast/drupalcommerce-aggregation/releases/tag/v1.5.0)
 

@@ -1,13 +1,5 @@
 <?php
 
-/**
- * Copyright (c) 2024 PayFast (Pty) Ltd
- * You (being anyone who is not PayFast (Pty) Ltd) may download and use this plugin / code in your own website in
- * conjunction with a registered and active Payfast account. If your Payfast account is terminated for any reason,
- * you may not use this plugin / code or part thereof. Except as expressly indicated in this licence, you may not use,
- * copy, modify or distribute this plugin / code or part thereof in any way.
- */
-
 namespace Payfast\PayfastCommon\Aggregator\Request;
 
 class PaymentRequest
@@ -38,8 +30,8 @@ class PaymentRequest
     public const PF_MSG_OK      = 'Payment was successful';
     public const PF_MSG_FAILED  = 'Payment has failed';
     public const PF_MSG_PENDING = 'The payment is pending. Please note, you will receive another Instant' .
-                                  ' Transaction Notification when the payment status changes to' .
-                                  ' "Completed", or "Failed"';
+    ' Transaction Notification when the payment status changes to' .
+    ' "Completed", or "Failed"';
     private bool $debugMode;
 
     /**
@@ -63,7 +55,7 @@ class PaymentRequest
         array $moduleInfo,
         string $pfHost = 'www.payfast.co.za',
         string $pfParamString = ''
-    ): bool {
+    ): bool{
         $pfFeatures = 'PHP ' . phpversion() . ';';
         $pfCurl     = false;
 
@@ -77,9 +69,9 @@ class PaymentRequest
         }
 
         $pfUserAgent = $moduleInfo["pfSoftwareName"] . '/' . $moduleInfo['pfSoftwareVer'] .
-                       ' (' . trim(
-                           $pfFeatures
-                       ) . ') ' . $moduleInfo["pfSoftwareModuleName"] . '/' . $moduleInfo["pfModuleVer"];
+            ' (' . trim(
+                $pfFeatures
+            ) . ') ' . $moduleInfo["pfSoftwareModuleName"] . '/' . $moduleInfo["pfModuleVer"];
 
         $this->pflog('Host = ' . $pfHost);
         $this->pflog('Params = ' . $pfParamString);
@@ -181,9 +173,9 @@ class PaymentRequest
                 if ($fh) {
                     $line = date('Y-m-d H:i:s') . ' : ' . $msg . "\n";
 
-                    try {
+                    try{
                         fwrite($fh, $line);
-                    } catch (\Exception $e) {
+                    } catch (\Exception $e){
                         error_log($e);
                     }
                 }
@@ -346,7 +338,7 @@ class PaymentRequest
         $passphrase = null,
         bool $testMode = false,
         bool $returnCurlRequest = false
-    ): string {
+    ): string{
         $url = "https://api.payfast.co.za/subscriptions/$token/$action";
 
         if ($testMode) {
@@ -385,7 +377,7 @@ class PaymentRequest
         array $data = [],
         bool $testMode = false,
         bool $returnCurlRequest = false
-    ): string {
+    ): string{
         $url    = "https://api.payfast.co.za/refunds/";
         $method = "GET";
 
@@ -434,7 +426,7 @@ class PaymentRequest
         array $body = [],
         $method = null,
         bool $returnCurlRequest = false
-    ): string {
+    ): string{
         $date      = date("Y-m-d");
         $time      = date("H:i:s");
         $timeStamp = $body['timestamp'] ?? $date . "T" . $time;
@@ -474,6 +466,10 @@ class PaymentRequest
 
         if ($method === "PUT" || $method === "PATCH") {
             $curlConfig[CURLOPT_CUSTOMREQUEST] = $method;
+            if (empty($body)) {
+                $headers[]                      = "Content-Length: 0";
+                $curlConfig[CURLOPT_HTTPHEADER] = $headers;
+            }
         }
 
         curl_setopt_array($ch, $curlConfig);
@@ -522,7 +518,7 @@ class PaymentRequest
      *
      * @return void
      */
-    public static function createTransaction($payArray, $passphrase = null, bool $testMode = false): void
+    public static function createTransaction($payArray, $passphrase = null, bool $testMode = false, $returnForm = false)
     {
         $url = $testMode ? 'https://sandbox.payfast.co.za/eng/process' : 'https://www.payfast.co.za/eng/process';
 
@@ -545,7 +541,7 @@ class PaymentRequest
             $inputs .= '<input type="hidden" name="' . $k . '" value="' . $v . '"/>';
         }
 
-        echo <<<EOT
+        $form = <<<HTML
     <html lang="en">
     <body onLoad="document.payfast_form.submit();">
         <form action="$url" method="post" name="payfast_form">
@@ -553,6 +549,12 @@ class PaymentRequest
         </form>
     </body>
     </html>
-EOT;
+HTML;
+
+        if ($returnForm) {
+            return $responseData = ['form' => $form, 'secureString' => $secureString, 'securityHash' => $securityHash];
+        } else {
+            echo $form;
+        }
     }
 }

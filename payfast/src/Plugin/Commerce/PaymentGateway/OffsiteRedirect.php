@@ -22,7 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @CommercePaymentGateway(
  *   id = "payfast",
- *   label = "Payfast",
+ *   label = "Payfast Aggregation",
  *   display_label = "Payfast",
  *   forms = {
  *     "offsite-payment" = "Drupal\commerce_payfast\PluginForm\OffsiteRedirect\PaymentOffsiteForm",
@@ -173,9 +173,9 @@ class OffsiteRedirect extends OffsitePaymentGatewayBase
         $pfParamString = '';
         $moduleInfo    = [
             'pfSoftwareName'       => 'drupalcommerce-2.x',
-            'pfSoftwareVer'        => '3.0.0',
+            'pfSoftwareVer'        => '3.2.0',
             'pfSoftwareModuleName' => 'Payfast-drupalcommerce-2.x',
-            'pfModuleVer'          => '1.4.1',
+            'pfModuleVer'          => '1.5.0',
         ];
 
         $paymentRequest->pflog('Payfast ITN call received');

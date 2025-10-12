@@ -1,0 +1,28 @@
+<?php
+
+use Drupal\Core\Extension\ExtensionPathResolver;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Render\Markup;
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_commerce_payment_gateway_info_alter().
+ */
+function commerce_payfast_commerce_payment_gateway_info_alter(array &$gateways) {
+  if (isset($gateways['payfast'])) {
+    $module_path = \Drupal::service('extension.path.resolver')->getPath('module', 'commerce_payfast');
+    $path = $module_path . '/images/payfast-logo.svg';
+
+    $logo_url = \Drupal::service('file_url_generator')->generateAbsoluteString($path);
+
+    $gateways['payfast']['label'] = Markup::create('<img src="' . $logo_url . '" alt="Payfast" class="payfast-logo"> Payfast Aggregation');
+  }
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function commerce_payfast_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'commerce_payfast/admin';
+}
+

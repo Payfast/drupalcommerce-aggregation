@@ -1,5 +1,5 @@
 {
   "require": {
-    "payfast/payfast-common": "v1.3.0"
+    "payfast/payfast-common": "v1.4.0"
   }
 }

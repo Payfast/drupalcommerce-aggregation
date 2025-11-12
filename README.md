@@ -40,7 +40,7 @@ You will need Drupal 9 or 10 with the latest version of Drupal Commerce 2 instal
 2. In your composer.json add the following under **"extra": { "installer-paths": {**
 
 ```
-"modules/commerce/modules": [
+            "modules/commerce/modules": [
                 "payfast"
             ]
 ```

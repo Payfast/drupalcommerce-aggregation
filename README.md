@@ -9,15 +9,6 @@ to [contact the Payfast support team](https://payfast.io/contact/) should you re
 
 You will need Drupal 9 or 10 with the latest version of Drupal Commerce 2 installed.
 
-### Option 1 - Manual install
-
-1. Unzip and copy the **payfast** folder to the **/modules/contrib/commerce/modules** directory.
-2. Log into the admin dashboard and install Commerce Payfast on the **Extend** page.
-3. Navigate to **Commerce** -> **Configuration** -> **Payment gateways** and click on **Add payment gateway**.
-4. Select **Payfast** and configure as required.
-5. Click **Save**.
-
-### Option 2 - Automatic install
 
 1. In your composer.json add the following under **"repositories": [**
 
@@ -25,12 +16,12 @@ You will need Drupal 9 or 10 with the latest version of Drupal Commerce 2 instal
         {
             "type": "package",
             "package": {
-                "name": "payfast",
-                "version": "1.5.0", 
+                "name": "payfast/drupalcommerce-aggregation",
+                "version": "1.5.0",
                 "type": "drupal-module",
-                "source": { 
+                "source": {
                     "url": "https://github.com/Payfast/drupalcommerce-aggregation.git",
-                    "type": "git", 
+                    "type": "git",
                     "reference": "master"
                 }
             }
@@ -41,13 +32,15 @@ You will need Drupal 9 or 10 with the latest version of Drupal Commerce 2 instal
 
 ```
             "modules/commerce/modules": [
-                "payfast"
+                "payfast/drupalcommerce-aggregation"
             ]
 ```
 
 3. Require the module using composer.
 
-```composer require 'payfast:^1.5.0'```
+```
+composer require 'payfast/drupalcommerce-aggregation:^1.5.0'
+```
 
 Please [click here](https://payfast.io/integration/plugins/drupal-commerce/) for more information concerning this
 module.

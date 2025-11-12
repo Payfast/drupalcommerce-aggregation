@@ -22,8 +22,19 @@ You will need Drupal 9 or 10 with the latest version of Drupal Commerce 2 instal
 1. In your composer.json add the following under **"repositories": [**
 
 ```
-{ "type": "package", "package": { "name": "payfast", "version": "1.5.0", "type": "drupal-module", "source": { "
-   url": "https://github.com/Payfast/mod-drupalcommerce.git", "type": "git", "reference": "master" } } },
+        {
+            "type": "package",
+            "package": {
+                "name": "payfast",
+                "version": "1.5.0", 
+                "type": "drupal-module",
+                "source": { 
+                    "url": "https://github.com/Payfast/drupalcommerce-aggregation.git",
+                    "type": "git", 
+                    "reference": "master"
+                }
+            }
+        }
 ```
 
 2. In your composer.json add the following under **"extra": { "installer-paths": {**

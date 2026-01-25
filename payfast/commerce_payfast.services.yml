@@ -1,4 +1,1 @@
-services:
-  your_module.site_url_service:
-    class: 'Drupal\commerce_payfast\SiteUrlService'
-    arguments: [ '@request_stack' ]
+services: {}

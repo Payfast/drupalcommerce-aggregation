@@ -53,7 +53,7 @@ class PaymentOffsiteForm extends BasePaymentOffsiteForm implements ContainerInje
         try {
             $payment->save();
         } catch (EntityStorageException $e) {
-            Drupal::logger('your_module')->error(
+            Drupal::logger('commerce_payfast')->error(
                 'Entity storage exception: @message',
                 ['@message' => $e->getMessage()]
             );
@@ -115,7 +115,7 @@ class PaymentOffsiteForm extends BasePaymentOffsiteForm implements ContainerInje
             $redirect_form = [];
             $redirect_form = $this->buildRedirectForm($form, $form_state, $url, $data, 'post');
         } catch (NeedsRedirectException $e) {
-            Drupal::logger('your_module')->error(
+            Drupal::logger('commerce_payfast')->error(
                 'Needs redirect exception: @message',
                 ['@message' => $e->getMessage()]
             );

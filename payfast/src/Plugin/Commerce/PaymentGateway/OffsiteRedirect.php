@@ -12,6 +12,8 @@ use Drupal\commerce_payment\Exception\PaymentGatewayException;
 use Drupal\commerce_payment\PaymentStorage;
 use Drupal\commerce_payment\Plugin\Commerce\PaymentGateway\OffsitePaymentGatewayBase;
 use Drupal\commerce_price\Price;
+use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
+use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Core\Entity\EntityStorageException;
 use Drupal\Core\Form\FormStateInterface;
 use Payfast\PayfastCommon\Aggregator\Request\PaymentRequest;
@@ -131,20 +133,25 @@ class OffsiteRedirect extends OffsitePaymentGatewayBase
     protected function loadPaymentByRemoteId($remote_id): mixed
     {
         $message = '@message';
+        $storage = NULL;
+
         /** @var PaymentStorage $storage */
         try {
             $storage = $this->entityTypeManager->getStorage('commerce_payment');
-        } catch (Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException $e) {
-            Drupal::logger('your_module')->error(
+        } catch (InvalidPluginDefinitionException $e) {
+            Drupal::logger('commerce_payfast')->error(
                 'Invalid plugin definition exception: @message',
                 [$message => $e->getMessage()]
             );
-        } catch (Drupal\Component\Plugin\Exception\PluginNotFoundException $e) {
-            Drupal::logger('your_module')->error(
+            return FALSE;
+        } catch (PluginNotFoundException $e) {
+            Drupal::logger('commerce_payfast')->error(
                 'Plugin not found exception: @message',
                 [$message => $e->getMessage()]
             );
+            return FALSE;
         }
+
         $payment_by_remote_id = $storage->loadByProperties(['order_id' => $remote_id]);
 
         return reset($payment_by_remote_id);
@@ -273,7 +280,7 @@ class OffsiteRedirect extends OffsitePaymentGatewayBase
                         // Mark order as completed in state storage
                         \Drupal::state()->set('payfast_order_notified_' . $order_id, true);
                     } catch (EntityStorageException $e) {
-                        Drupal::logger('your_module')->error(
+                        Drupal::logger('commerce_payfast')->error(
                             'Entity storage exception: @message',
                             [$message => $e->getMessage()]
                         );

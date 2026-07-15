@@ -131,21 +131,28 @@ class OffsiteRedirect extends OffsitePaymentGatewayBase
     protected function loadPaymentByRemoteId($remote_id): mixed
     {
         $message = '@message';
+        $storage = null;
         /** @var PaymentStorage $storage */
         try {
             $storage = $this->entityTypeManager->getStorage('commerce_payment');
         } catch (Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException $e) {
-            Drupal::logger('your_module')->error(
+            Drupal::logger('commerce_payfast')->error(
                 'Invalid plugin definition exception: @message',
                 [$message => $e->getMessage()]
             );
         } catch (Drupal\Component\Plugin\Exception\PluginNotFoundException $e) {
-            Drupal::logger('your_module')->error(
+            Drupal::logger('commerce_payfast')->error(
                 'Plugin not found exception: @message',
                 [$message => $e->getMessage()]
             );
         }
-        $payment_by_remote_id = $storage->loadByProperties(['order_id' => $remote_id]);
+        if ($storage === null) {
+            return false;
+        }
+        // Payfast's unique transaction id is stored on the payment as its
+        // remote_id, so dedupe against that - not the order id, which every
+        // payment for the order would share.
+        $payment_by_remote_id = $storage->loadByProperties(['remote_id' => $remote_id]);
 
         return reset($payment_by_remote_id);
     }
@@ -254,6 +261,36 @@ class OffsiteRedirect extends OffsitePaymentGatewayBase
                 if ($order) {
                     $message = '@message';
 
+                    // Idempotency: Payfast retries the ITN until it gets a 200,
+                    // so the same pf_payment_id can arrive several times. Never
+                    // record a second payment for a transaction already stored.
+                    $existing = $this->loadPaymentByRemoteId($pfData['pf_payment_id']);
+                    if ($existing) {
+                        $paymentRequest->pflog(
+                            'Duplicate ITN ignored for pf_payment_id ' . $pfData['pf_payment_id']
+                        );
+
+                        return;
+                    }
+
+                    // Amount tampering check: the ITN is signature-verified, but
+                    // the buyer controls the amount posted to the process page,
+                    // so confirm the paid gross matches the order total before
+                    // recording a completed payment. Payfast trades in ZAR only.
+                    $orderTotal = $order->getTotalPrice();
+                    $paidAmount = (string) $pfData['amount_gross'];
+                    if ($orderTotal === null
+                        || abs((float) $orderTotal->getNumber() - (float) $paidAmount) > 0.01) {
+                        $paymentRequest->pflog(sprintf(
+                            'Amount mismatch for order %s: paid %s, expected %s. Payment rejected.',
+                            $order_id,
+                            $paidAmount,
+                            $orderTotal === null ? 'unknown' : $orderTotal->getNumber()
+                        ));
+
+                        return;
+                    }
+
                     try {
                         $payment_storage = $this->entityTypeManager->getStorage('commerce_payment');
 
@@ -273,7 +310,7 @@ class OffsiteRedirect extends OffsitePaymentGatewayBase
                         // Mark order as completed in state storage
                         \Drupal::state()->set('payfast_order_notified_' . $order_id, true);
                     } catch (EntityStorageException $e) {
-                        Drupal::logger('your_module')->error(
+                        Drupal::logger('commerce_payfast')->error(
                             'Entity storage exception: @message',
                             [$message => $e->getMessage()]
                         );

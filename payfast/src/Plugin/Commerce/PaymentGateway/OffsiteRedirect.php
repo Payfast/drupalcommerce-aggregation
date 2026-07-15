@@ -2,8 +2,6 @@
 
 namespace Drupal\commerce_payfast\Plugin\Commerce\PaymentGateway;
 
-require_once __DIR__ . '/../../../../vendor/autoload.php';
-
 use Drupal;
 use Drupal\commerce_order\Entity\Order;
 use Drupal\commerce_order\Entity\OrderInterface;
